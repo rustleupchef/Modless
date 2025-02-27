@@ -1,0 +1,7 @@
+{
+  "access_token" : "",
+  "channel": "monkeypoxspreaders",
+  "guidelines" : "",
+  "spamming" : 90,
+  "model" : "mistral"
+}
