@@ -19,6 +19,7 @@ class Program
     private static int spamming;
     private static int timeout;
     private static Dictionary<string, Chatter> chatters = new Dictionary<string, Chatter>();
+    private static Dictionary<string, int> timeouts = new Dictionary<string, int>();
     
     internal static void Main()
     {
@@ -71,6 +72,7 @@ class Program
             chatter.messages++;
             if (chatter.difference(DateTime.Now.ToString("HH:mm:ss")) > spamming)
             {
+                chatters.Remove(e.ChatMessage.Username);
                 chatters.Add(e.ChatMessage.Username, new Chatter(1, DateTime.Now.ToString("HH:mm:ss")));
             }
             else if (chatter.messages > 10)
@@ -78,8 +80,8 @@ class Program
                 client.SendMessage(channel, $"{e.ChatMessage.Username} is spamming");
                 if (chatter.messages > 15)
                 {
-                    client.TimeoutUser(channel, e.ChatMessage.Username, TimeSpan.FromMinutes(timeout),
-                        $"{e.ChatMessage.Username} will be timed out for {timeout} minutes");
+                    timeoutUser(e.ChatMessage.Username, $"{e.ChatMessage.Username} will be timed out for {timeout} minutes");
+                    chatters.Remove(e.ChatMessage.Username);
                 }
             }
         }
@@ -134,5 +136,14 @@ class Program
     private static void connected(object? sender, OnConnectedArgs e)
     {
         client.SendMessage(channel, "Hello Twitch! The Modless bot will be moderating this steam");
+    }
+
+    private static void timeoutUser(string user, string message)
+    {
+        client.TimeoutUser(channel, user, TimeSpan.FromMinutes(timeout), message);
+        if (timeouts.ContainsKey(user))
+            timeouts[user]++;
+        else
+            timeouts.Add(user, 1);
     }
 }

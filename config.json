@@ -2,7 +2,7 @@
   "access_token" : "",
   "channel": "monkeypoxspreaders",
   "guidelines" : "",
-  "spamming" : 90,
+  "spamming" : 30,
   "timeout" : 5,
   "model" : "mistral"
 }
