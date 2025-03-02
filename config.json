@@ -4,5 +4,6 @@
   "guidelines" : "",
   "spamming" : 30,
   "timeout" : 5,
+  "banned" : 5,
   "model" : "mistral"
 }

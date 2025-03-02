@@ -18,6 +18,7 @@ class Program
     private static string channel;
     private static int spamming;
     private static int timeout;
+    private static int banned;
     private static Dictionary<string, Chatter> chatters = new Dictionary<string, Chatter>();
     private static Dictionary<string, int> timeouts = new Dictionary<string, int>();
     
@@ -31,6 +32,7 @@ class Program
         _model = json.model;
         spamming = json.spamming;
         timeout = json.timeout;
+        banned = json.banned;
 
         // set default guidelines if hone are set
         if (string.IsNullOrEmpty(guidelines))
@@ -127,7 +129,8 @@ class Program
             string text = await response.Content.ReadAsStringAsync();
             dynamic json = JsonConvert.DeserializeObject(text);
             text = (string) json.response;
-            Console.WriteLine(text);
+            if (text.ToLower().Contains("neg"))
+                timeoutUser(e.ChatMessage.Username, $"{e.ChatMessage.Username} will be timed out for {timeout} minutes");
         }
 
         run();
@@ -140,10 +143,16 @@ class Program
 
     private static void timeoutUser(string user, string message)
     {
+        client.SendMessage(channel, message);
         client.TimeoutUser(channel, user, TimeSpan.FromMinutes(timeout), message);
         if (timeouts.ContainsKey(user))
             timeouts[user]++;
         else
             timeouts.Add(user, 1);
+        if (timeouts[user] > banned)
+        {
+            client.SendMessage(channel, $"{user} will be banned");
+            client.BanUser(channel, user);
+        }
     }
 }

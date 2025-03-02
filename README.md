@@ -11,6 +11,7 @@ The structure of the config.json goes as such
   "guidelines" : "path_to_guideline_or_raw_guidelines",
   "spamming" : <integer_in_seconds>,
   "timeout" : <integer_in_minutes>,
+  "banned" : <integer>
   "model" : "llm-model"
 }
 ```
@@ -43,6 +44,9 @@ Saying 90 seconds for example will mean if someone texts 10 times in 90 seconds 
 
 ## timeout
 This just holds an integer. It determines how long each timeout will last.
+
+## banned
+This just holds an integer. It determines how many timeouts will constitute a ban.
 
 ## model
 The model will just be the large language model of your choosing.
