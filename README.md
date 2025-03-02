@@ -9,7 +9,8 @@ The structure of the config.json goes as such
   "access_token" : "access_token",
   "channel": "user_name",
   "guidelines" : "path_to_guideline_or_raw_guidelines",
-  "spamming" : <integer_in_seconds>
+  "spamming" : <integer_in_seconds>,
+  "timeout" : <integer_in_minutes>,
   "model" : "llm-model"
 }
 ```
@@ -39,6 +40,9 @@ If you enter an empty string for whatever reason a generic set of community guid
 ## spamming
 This just holds an integer. It's how much someone needs to spread apart their messages to not be considered spamming
 Saying 90 seconds for example will mean if someone texts 10 times in 90 seconds they will be called out for spamming
+
+## timeout
+This just holds an integer. It determines how long each timeout will last.
 
 ## model
 The model will just be the large language model of your choosing.

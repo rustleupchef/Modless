@@ -5,14 +5,19 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using Microsoft.ML;
 using Microsoft.ML.Data;
+using TwitchLib.Client.Extensions;
+using TwitchLib.Communication.Events;
 
 namespace Modless;
 
 class Program
 {
+    private static TwitchClient client;
     private static string guidelines;
     private static string _model;
+    private static string channel;
     private static int spamming;
+    private static int timeout;
     private static Dictionary<string, Chatter> chatters = new Dictionary<string, Chatter>();
     
     internal static void Main()
@@ -20,10 +25,11 @@ class Program
         // read config json
         dynamic json = JsonConvert.DeserializeObject(File.ReadAllText("config.json"));
         string accessToken = json.access_token;
-        string channel = json.channel;
+        channel = json.channel;
         guidelines = json.guidelines;
         _model = json.model;
         spamming = json.spamming;
+        timeout = json.timeout;
 
         // set default guidelines if hone are set
         if (string.IsNullOrEmpty(guidelines))
@@ -36,10 +42,11 @@ class Program
         Console.WriteLine($"Guidelines:\n{guidelines}");
         
         ConnectionCredentials credentials = new(channel, accessToken);
-        TwitchClient client = new();
+        client = new();
         
         client.Initialize(credentials, channel);
         client.Connect();
+        client.OnConnected += connected;
 
         client.OnMessageReceived += messaged;
         
@@ -48,6 +55,7 @@ class Program
         Console.ReadKey();
         Console.WriteLine("\nDisconnecting...");
         
+        client.SendMessage(channel, "Goodbye. The Modless bot will stop moderating this steam");
         client.Disconnect();
     }
 
@@ -62,9 +70,18 @@ class Program
             Chatter chatter = chatters[e.ChatMessage.Username];
             chatter.messages++;
             if (chatter.difference(DateTime.Now.ToString("HH:mm:ss")) > spamming)
+            {
                 chatters.Add(e.ChatMessage.Username, new Chatter(1, DateTime.Now.ToString("HH:mm:ss")));
+            }
             else if (chatter.messages > 10)
-                Console.WriteLine(e.ChatMessage.Username + " is spamming");
+            {
+                client.SendMessage(channel, $"{e.ChatMessage.Username} is spamming");
+                if (chatter.messages > 15)
+                {
+                    client.TimeoutUser(channel, e.ChatMessage.Username, TimeSpan.FromMinutes(timeout),
+                        $"{e.ChatMessage.Username} will be timed out for {timeout} minutes");
+                }
+            }
         }
         
         async Task run()
@@ -112,5 +129,10 @@ class Program
         }
 
         run();
+    }
+
+    private static void connected(object? sender, OnConnectedArgs e)
+    {
+        client.SendMessage(channel, "Hello Twitch! The Modless bot will be moderating this steam");
     }
 }

@@ -3,5 +3,6 @@
   "channel": "monkeypoxspreaders",
   "guidelines" : "",
   "spamming" : 90,
+  "timeout" : 5,
   "model" : "mistral"
 }
